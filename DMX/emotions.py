@@ -282,6 +282,26 @@ def play_emotion(emotion: str, bars: list[Infinibar], strips: list[Flex20], dura
                 bars[0].submit()
                 sleep(speed)
 
+        elif effect == "gradient_wave":
+        # Animated wave of color gradients across chunks
+            frequency = 0.5  # controls wave length
+            while time() - start_time < duration:
+                current_time = time() - start_time
+                for c in range(len(bars[0].chunks)):
+                    wave_intensity = int((math.sin(current_time * frequency + c) + 1) / 2 * 255)
+                    color = colors[c % len(colors)]
+                    for bar in bars:
+                        bar.set_red(c, color[0])
+                        bar.set_green(c, color[1])
+                        bar.set_blue(c, color[2])
+                        bar.set_intensity(c, wave_intensity)
+                avg_color = colors[int(current_time) % len(colors)]
+                avg_intensity = int((math.sin(current_time) + 1) / 2 * 255)
+                for strip in strips:
+                    strip.fg_rgb(avg_color, brightness=avg_intensity)
+                bars[0].submit()
+                sleep(0.05)
+
         else:
             print(f"Unknown effect: {effect}")
             break # Exit loop if effect is not found
