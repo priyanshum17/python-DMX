@@ -65,6 +65,10 @@ EMOTION_SCHEMAS = {
     "pride": {
         "colors": [[255, 215, 0], [128, 0, 128], [218, 165, 32]],  # Gold, Purple, Goldenrod
         "effect": "regal_march"
+    },
+    "test": {
+        "colors": [[255, 215, 0], [128, 0, 128], [218, 165, 32]],
+        "effect": "gradient_wave"
     }
 }
 
