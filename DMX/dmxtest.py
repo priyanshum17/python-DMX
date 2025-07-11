@@ -121,7 +121,7 @@ if __name__=="__main__":
 
     cliArgumentParser = argparse.ArgumentParser()
     cliArgumentParser.add_argument("-m", dest="MODE", metavar="MODE", type=int, required=True, help="What mode should the bar(s) be set to?")
-    cliArgumentParser.add_argument("-c", dest="COM", metavar="COM", type=int, required=True, help="What COM port is the Enttec controller on?")
+    cliArgumentParser.add_argument("-c", dest="COM", metavar="COM", type=str, required=True, help="What COM port is the Enttec controller on?")
     cliArgumentParser.add_argument('--verbose', '-v', action='count', default=0, required=False, help="Enable verbose output")
     args = cliArgumentParser.parse_args()
 
@@ -141,7 +141,7 @@ if __name__=="__main__":
     streamHandler.setLevel(loglevel)
     logger.addHandler(streamHandler)
 
-    dmx = Controller('COM%d' % args.COM)
+    dmx = Controller(args.COM)
 
     lightThreads = []
 
