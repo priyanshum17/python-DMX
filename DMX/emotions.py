@@ -2,6 +2,7 @@ from DMXEnttecPro import Controller
 from Aputure import Infinibar
 from Epix import Flex20
 from time import sleep, time
+from typing import List
 import logging, tomli, threading, random, math
 
 # Emotion-Color Mappings (examples, can be customized)
@@ -12,7 +13,7 @@ EMOTION_SCHEMAS = {
     },
     "sadness": {
         "colors": [[0, 0, 139], [0, 0, 205], [70, 130, 180]],  # Deep Blues, Steel Blue
-        "effect": "slow_fade"
+        "effect": "dual_wave"
     },
     "anger": {
         "colors": [[255, 0, 0], [139, 0, 0], [255, 69, 0]],  # Reds, Orange-Red
@@ -68,7 +69,7 @@ EMOTION_SCHEMAS = {
     }
 }
 
-def play_emotion(emotion: str, bars: list[Infinibar], strips: list[Flex20], duration: int):
+def play_emotion(emotion: str, bars: List[Infinibar], strips: List[Flex20], duration: int):
     if emotion not in EMOTION_SCHEMAS:
         print(f"Unknown emotion: {emotion}")
         return
@@ -81,10 +82,12 @@ def play_emotion(emotion: str, bars: list[Infinibar], strips: list[Flex20], dura
     def set_all_bars(r, g, b, intensity=255):
         for bar in bars:
             for c in range(len(bar.chunks)):
+                bar.set_crossfade(c, 0)
                 bar.set_red(c, r)
                 bar.set_green(c, g)
                 bar.set_blue(c, b)
                 bar.set_intensity(c, intensity)
+                
 
     def set_all_strips(r, g, b, brightness=255):
         for strip in strips:
@@ -99,6 +102,7 @@ def play_emotion(emotion: str, bars: list[Infinibar], strips: list[Flex20], dura
                 for bar in bars:
                     # Turn off all chunks first for a cleaner chase
                     for c in range(len(bar.chunks)):
+                        bar.set_crossfade(c, 0)
                         bar.set_intensity(c, 0)
                     bar.set_red(i, color[0])
                     bar.set_green(i, color[1])
@@ -262,6 +266,40 @@ def play_emotion(emotion: str, bars: list[Infinibar], strips: list[Flex20], dura
                     bars[0].submit()
                     sleep(speed)
                 sleep(1) # Pause
+        
+        elif effect == "dual_wave":
+            base, accent = colors[0], colors[1]
+            #dual_wave(bars, strips, base, accent, duration=duration, trail=3, step_delay=0.05)
+            trail=3
+            step_delay=0.05
+            n_chunks = len(bars[0].chunks)
+            start_time = time()
+            pos = -trail
+            while time() - start_time < duration:
+                # Move the leading edge
+                pos = (pos + 1) % (n_chunks + trail)  # loop forever
+                for c in range(n_chunks):
+                    # Determine colour for this chunk
+                    if pos - trail <= c <= pos:                # inside the moving window
+                        d = pos - c                            # distance from the tip
+                        t = (trail - d) / trail                # 0→1 blend factor
+                        r = int(base[0]*(1-t) + accent[0]*t)
+                        g = int(base[1]*(1-t) + accent[1]*t)
+                        b = int(base[2]*(1-t) + accent[2]*t)
+                    else:
+                        r, g, b = base
+                    # Push to every bar
+                    for bar in bars:
+                        bar.set_crossfade(c, 0)
+                        bar.set_red(c,   r)
+                        bar.set_green(c, g)
+                        bar.set_blue(c,  b)
+                        bar.set_intensity(c, 200)  # 0–255; tweak if too bright/dim
+                # Optionally mirror the average colour on your Epix strips
+                if strips:
+                    strips[0].fg_rgb((accent if pos < trail else base), brightness=180)
+                bars[0].submit()
+                sleep(step_delay)
 
         elif effect == "regal_march":
             speed = 0.2
@@ -272,6 +310,7 @@ def play_emotion(emotion: str, bars: list[Infinibar], strips: list[Flex20], dura
                     for c in range(len(bar.chunks)):
                         # Alternate colors down the bar
                         color = color1 if (c+i) % 2 == 0 else color2
+                        bar.set_crossfade(c, 0)
                         bar.set_red(c, color[0])
                         bar.set_green(c, color[1])
                         bar.set_blue(c, color[2])
@@ -302,7 +341,9 @@ if __name__ == "__main__":
     cliArgumentParser.add_argument("-e", dest="EMOTION", metavar="EMOTION", type=str, required=True, help=f"Emotion to display. Choices: {', '.join(EMOTION_SCHEMAS.keys())}")
     cliArgumentParser.add_argument("-c", dest="COM", metavar="COM", type=str, required=True, help="COM port or device path for the Enttec controller.")
     cliArgumentParser.add_argument("-d", dest="DURATION", metavar="SECONDS", type=int, default=10, help="How long the emotion should be displayed for, in seconds.")
-    cliArgumentParser.add_argument("-m", dest="MODE", metavar="MODE", type=int, default=9, help="DMX mode for the Infinibar(s).")
+    #cliArgumentParser.add_argument("-m", dest="MODE", metavar="MODE", type=int, default=9, help="DMX mode for the Infinibar(s).")
+    cliArgumentParser.add_argument("-m", dest="MODE", metavar="MODE", type=int, default=13, help="DMX mode for the Infinibar(s). ""9=4px,10=6px,11=8px,12=12px,13=16px,14=24px,15=32px,16=48px")
+
     cliArgumentParser.add_argument('--verbose', '-v', action='count', default=0, help="Enable verbose output. -v for INFO, -vv for DEBUG.")
     args = cliArgumentParser.parse_args()
 
@@ -321,7 +362,7 @@ if __name__ == "__main__":
 
     # Load config
     try:
-        with open('DMX/config.toml', "rb") as conf:
+        with open('config.toml', "rb") as conf:
             config = tomli.load(conf)
     except FileNotFoundError:
         logger.error("Error: config.toml not found. Please ensure it exists in the same directory.")
@@ -329,7 +370,16 @@ if __name__ == "__main__":
 
 
     dmx = Controller(args.COM)
+    # bars = [Infinibar(b, args.MODE, dmx, logger) for b in config['lights']['BARS']]
+
     bars = [Infinibar(b, args.MODE, dmx, logger) for b in config['lights']['BARS']]
+    # sanity check: are we lighting the whole bar?
+    PIXELS_SEEN = len(bars[0].chunks)
+    # if PIXELS_SEEN < MODE_CHUNKS.get(args.MODE, 0):
+    #     logger.warning(f"Infinibar is reporting {PIXELS_SEEN} pixel-chunks but DMX mode "
+    #                    f"{args.MODE} should expose {MODE_CHUNKS[args.MODE]}. "
+    #                    "Double-check the fixture menu or the -m flag.")
+
     strips = [Flex20(s, dmx, logger) for s in config['lights']['STRIPS']]
 
     try:

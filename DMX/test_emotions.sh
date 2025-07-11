@@ -3,7 +3,7 @@
 # This script tests all the emotion lighting schemas defined in emotions.py
 
 # IMPORTANT: Replace this with the actual path to your serial port
-COM_PORT="/dev/cu.usbserial-EN472951"
+COM_PORT="/dev/ttyUSB1"
 
 # List of all emotions and their effects
 EMOTIONS=(
@@ -38,7 +38,7 @@ for item in "${EMOTIONS[@]}"; do
     echo "----------------------------------------"
 
     # Run the python script
-    python3 emotions.py -e "$emotion" -c "$COM_PORT" -d 10
+    python3 emotions.py -e "$emotion" -c "$COM_PORT" -m 13 -d 10
 
     # Optional: add a small delay between tests if needed
     sleep 2
