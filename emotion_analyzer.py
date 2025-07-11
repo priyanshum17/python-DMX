@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 # Configure Gemini
-client = genai.Client(api_key="AIzaSyAJYSDCqyfgRnDSB_90Tj7po4wVQoC8StU")
+client = genai.Client(api_key="ENTER_KEY")
 
 # Available emotions and effects
 AVAILABLE_EMOTIONS = [
