@@ -20,7 +20,7 @@ The `dmxtest.py` script serves as an example of how to use the library and provi
 
 1.  Clone this repository:
     ```bash
-    git clone https://github.com/your-username/python-dmx.git
+    git clone https://github.com/priyanshum17/python-dmx.git
     ```
 2.  Install the required Python libraries:
     ```bash
