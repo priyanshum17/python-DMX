@@ -1,3 +1,6 @@
 DMXEnttecPro
 tomli
 argparse
+google-genai
+python-dotenv
+pydantic

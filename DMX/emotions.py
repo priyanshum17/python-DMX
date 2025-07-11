@@ -321,7 +321,7 @@ if __name__ == "__main__":
 
     # Load config
     try:
-        with open('config.toml', "rb") as conf:
+        with open('DMX/config.toml', "rb") as conf:
             config = tomli.load(conf)
     except FileNotFoundError:
         logger.error("Error: config.toml not found. Please ensure it exists in the same directory.")
