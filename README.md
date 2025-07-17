@@ -2,8 +2,6 @@
 
 This project provides a Python-based solution for controlling DMX lighting fixtures, enabling the creation of dynamic, emotion-driven environments. By analyzing text input, the system identifies the dominant emotion and translates it into a corresponding lighting effect. The project is designed to be easily extensible, allowing for the addition of new emotions, lighting fixtures, and effects.
 
-https://github.com/priyanshum17/python-dmx/assets/67699325/1343335a-8039-4444-8b0a-372181553b5f
-
 ## Table of Contents
 
 - [Features](#features)
