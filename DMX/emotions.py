@@ -4,7 +4,7 @@ from Epix import Flex20
 from time import sleep, time
 import logging, tomli, threading, random, math
 
-# Emotion-Color Mappings (examples, can be customized)
+# Emotion-Color Mappings
 EMOTION_SCHEMAS = {
     "joy": {
         "colors": [[255, 255, 0], [255, 165, 0], [255, 215, 0]],  # Yellows, Oranges, Gold
@@ -69,6 +69,15 @@ EMOTION_SCHEMAS = {
 }
 
 def play_emotion(emotion: str, bars: list[Infinibar], strips: list[Flex20], duration: int):
+    """
+    Plays a lighting effect for a given emotion.
+
+    Args:
+        emotion (str): The emotion to be displayed.
+        bars (list[Infinibar]): A list of Infinibar objects.
+        strips (list[Flex20]): A list of Flex20 objects.
+        duration (int): The duration of the effect in seconds.
+    """
     if emotion not in EMOTION_SCHEMAS:
         print(f"Unknown emotion: {emotion}")
         return
@@ -287,6 +296,13 @@ def play_emotion(emotion: str, bars: list[Infinibar], strips: list[Flex20], dura
             break # Exit loop if effect is not found
 
 def turn_off_all(bars, strips):
+    """
+    Turns off all connected lighting fixtures.
+
+    Args:
+        bars (list[Infinibar]): A list of Infinibar objects.
+        strips (list[Flex20]): A list of Flex20 objects.
+    """
     print("\nTurning off all lights.")
     for bar in bars:
         bar.OFF()
@@ -321,7 +337,7 @@ if __name__ == "__main__":
 
     # Load config
     try:
-        with open('DMX/config.toml', "rb") as conf:
+        with open('config.toml', "rb") as conf:
             config = tomli.load(conf)
     except FileNotFoundError:
         logger.error("Error: config.toml not found. Please ensure it exists in the same directory.")

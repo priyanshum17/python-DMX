@@ -2,7 +2,7 @@ import os
 import time
 import subprocess
 
-COM_PORT = "/dev/cu.usbserial-EN472951"  # Replace with your actual COM port
+COM_PORT = "/dev/cu.usbserial-EN472951"
 
 
 def test_emotion_analyzer():
@@ -19,6 +19,7 @@ def test_emotion_analyzer():
                 text = f.read()
             
             print(f"--- Testing with {filename} ---")
+            print(text)
             command = [
                 "python3",
                 "emotion_analyzer.py",
@@ -39,6 +40,8 @@ def test_emotion_analyzer():
                 print(f"✗ Error running emotion_analyzer.py for {filename}: {e} ({elapsed:.2f} sec)")
             total_files += 1
             print("---------------------------\n")
+
+            time.sleep(2)
 
     # Summary
     print("========== Summary ==========")
